@@ -8,9 +8,25 @@ from django.contrib.auth.models import User
 from django.http import JsonResponse
 
 # Create your views here.
+@api_view(['POST'])
+@csrf_exempt
+def login(request):
+    if request.method == 'POST':
+        email = request.data.get('email')
+        password = request.data.get('password')
 
-def login():
-    return "Login page"
+        if not email or not password:
+            return JsonResponse({'error': 'Email and password are required'}, status=status.HTTP_400_BAD_REQUEST)
+
+        try:
+            user = User.objects.get(email=email)
+        except User.DoesNotExist:
+            return JsonResponse({'error': 'Invalid credentials'}, status=status.HTTP_401_UNAUTHORIZED)
+
+        if not user.check_password(password):
+            return JsonResponse({'error': 'Invalid credentials'}, status=status.HTTP_401_UNAUTHORIZED)
+
+        return JsonResponse({'message': 'Login successful'}, status=status.HTTP_200_OK)
 
 
 @api_view(['POST'])
