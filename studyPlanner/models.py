@@ -7,7 +7,7 @@ class Subject (models.Model):
     user_id=models.ForeignKey(User, on_delete=models.CASCADE)
     name=models.CharField(max_length=100)
     discription=models.TextField(blank=True,null=True)
-    created_at= models.TimeField()
+    created_at= models.DateTimeField()
 
     def __str__(self):
         return self.name
