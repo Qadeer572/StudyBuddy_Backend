@@ -27,3 +27,7 @@ def addSubject(request):
         return JsonResponse({'success': 'Added successfully'}, status=status.HTTP_201_CREATED)
     else:
         return JsonResponse({'error': 'User not authenticated'}, status=status.HTTP_401_UNAUTHORIZED)
+
+
+
+  
