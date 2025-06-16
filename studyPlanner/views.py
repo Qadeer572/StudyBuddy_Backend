@@ -1,33 +1,37 @@
-from django.shortcuts import render
-from django.views.decorators.csrf import csrf_exempt  # Not used anymore
-from rest_framework.decorators import api_view
-from rest_framework import status
+from rest_framework.views import APIView
+from rest_framework.permissions import IsAuthenticated
+from rest_framework.response import Response
+from rest_framework import authentication, permissions
 from django.contrib.auth.models import User
-from .models import Subject, Topic
-from django.http import JsonResponse
-from datetime import date
+from .serializers  import addSubjectSerializer
+from django.contrib.auth import authenticate
+from rest_framework.authtoken.models import Token
+from .models import Subject
 
-@api_view(['POST'])
-def addSubject(request):
-    title = request.data.get('subjectTitle')
-    description = request.data.get('description')
 
-    if not title:
-        return JsonResponse({'error': 'Please fill all fields'}, status=status.HTTP_400_BAD_REQUEST)
+class addSubject(APIView):
+    permission_classes = [IsAuthenticated]
+    def post(self,request):
+        data= request.data
 
-    if request.user.is_authenticated:
-        current_user = request.user
-        subject = Subject(
+        serializer= addSubjectSerializer(data=data)
+
+        if not serializer.is_valid():
+            return Response({
+                "status" : False,
+                 "data": serializer.errors
+            })
+        
+        title=serializer.data("title")
+        description=serializer.data("description")
+        subject= Subject(
             name=title,
-            user_id=current_user,
-            description=description,  # Fix spelling in model too
-            created_at=date.today()
+            discription=description
         )
         subject.save()
-        return JsonResponse({'success': 'Added successfully'}, status=status.HTTP_201_CREATED)
-    else:
-        return JsonResponse({'error': 'User not authenticated'}, status=status.HTTP_401_UNAUTHORIZED)
 
-
-
-  
+        return Response({
+            "status" : True,
+            "Data"   : {},
+            "message": "Subject added Successfully"
+        })

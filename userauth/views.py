@@ -22,10 +22,9 @@ class userApiview(APIView):
 
 
 class userLogin(APIView):
-     permission_classes = [IsAuthenticated]
+      
      def post(self, request):
           data=request.data
-
           serializer= loginSerializer(data=data)
 
           if not serializer.is_valid():

@@ -10,3 +10,7 @@ class userSerialzer(serializers.ModelSerializer):
 class loginSerializer(serializers.Serializer):
     username= serializers.CharField()
     password=serializers.CharField()
+
+class addSubjectSerializer(serializers.Serializer):
+    name=serializers.CharField()
+    description= serializers.CharField()    
