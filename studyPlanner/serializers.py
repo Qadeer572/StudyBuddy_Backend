@@ -5,5 +5,5 @@ from .models import Subject
  
 
 class addSubjectSerializer(serializers.Serializer):
-    title=serializers.CharField()
-    description= serializers.CharField()    
+    subjectTitle=serializers.CharField()
+    description= serializers.CharField(allow_blank=True, required=False, default="")    
