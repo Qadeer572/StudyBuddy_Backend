@@ -14,7 +14,7 @@ class Subject (models.Model):
 
 
 class StatusChoices(models.TextChoices):
-    NOT_STARTED = 'NOT_PENDING', 'Not Started'
+    NOT_STARTED = 'NOT_STARTED', 'Not Started'
     COMPLETED = 'COMPLETED', 'Completed'
     IN_PROGRESS = 'IN_PROGRESS', 'In Progress'
 
@@ -24,8 +24,7 @@ class Topic(models.Model):
     title=models.CharField(max_length=200)
     deadline=models.DateField()
     status = models.CharField(max_length=20,choices=StatusChoices.choices,default=StatusChoices.NOT_STARTED)
-    assign_t=models.ForeignKey(User,blank=True, null=True,on_delete=models.CASCADE)
-    created_at=models.TimeField()
+    created_at=models.DateField()
 
     def __str__(self):
-        return self.name
+        return self.title
