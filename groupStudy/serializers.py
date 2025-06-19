@@ -6,6 +6,11 @@ from django.contrib.auth.models import User
 from rest_framework.exceptions import ValidationError
 from .models import StudyGroup,GroupMemberShip
 
+class groupSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = StudyGroup
+        fields = ['id', 'name', 'invite_code','created_by','created_at']
+
 
 class AddMemberSerializer(serializers.Serializer):
     invite_code = serializers.CharField(max_length=10, required=True)
@@ -35,10 +40,7 @@ class AddMemberSerializer(serializers.Serializer):
         return new_member
 
 
-class GroupStudySerializer(serializers.ModelSerializer):
-    class meta:
-        model = StudyGroup
-        fields = ['id', 'name', 'invite_code', 'created_by', 'created_at']
+ 
 
 class GroupCreationSerializer(serializers.Serializer):
     name = serializers.CharField(max_length=100)
