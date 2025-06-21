@@ -4,7 +4,7 @@ import random
 from datetime import date
 from django.contrib.auth.models import User
 from rest_framework.exceptions import ValidationError
-from .models import StudyGroup,GroupMemberShip
+from .models import StudyGroup,GroupMemberShip,GroupTask,SharedStudyPlanner
 
 class groupSerializer(serializers.ModelSerializer):
     class Meta:
@@ -76,5 +76,73 @@ class GroupCreationSerializer(serializers.Serializer):
         
         if  serializer.is_valid():
             serializer.save()
-        return group_study      
-    
+        return group_study  
+
+
+        
+class sharedStudyPlannerSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = SharedStudyPlanner
+        fields = ['id', 'group_id', 'topicDiscription','status', 'dueDate', 'created_by']
+
+ 
+
+class addGroupTaskSerializer(serializers.Serializer):
+    group_id = serializers.IntegerField()
+    task_name = serializers.CharField(max_length=100)
+    due_date = serializers.DateField()
+    assign_to = serializers.CharField(max_length=100, required=False)
+
+    def validate_group_id(self, value):
+        if not StudyGroup.objects.filter(id=value).exists():
+            raise ValidationError("Invalid group ID.")
+        return value
+
+    def validate_assign_to(self, value):
+        try:
+            user = User.objects.get(username=value)
+        except User.DoesNotExist:
+            raise ValidationError("Assigned user does not exist.")
+
+        # Optional: check if user is in the group
+        group_id = self.initial_data.get('group_id')
+        if group_id and not GroupMemberShip.objects.filter(user_id=user, group_id=group_id).exists():
+            raise ValidationError("Assigned user is not a member of the group.")
+
+        return value
+
+    def create(self, validated_data):
+        group = StudyGroup.objects.get(id=validated_data['group_id'])
+
+        assigned_user = None
+        if 'assign_to' in validated_data:
+            assigned_user = User.objects.get(username=validated_data['assign_to'])
+
+        task = GroupTask.objects.create(
+            group_id=group,
+            task_name=validated_data['task_name'],
+            due_date=validated_data['due_date'],
+            assigned_to=assigned_user
+        )
+        return task
+
+
+ 
+
+class AddSharedStudyPlannerSerializer(serializers.Serializer):
+    group_id = serializers.IntegerField()
+    topicDiscription = serializers.CharField(max_length=500)
+    dueDate = serializers.DateField()
+
+    def validate_group_id(self, value):
+        if not StudyGroup.objects.filter(id=value).exists():
+            raise serializers.ValidationError("Invalid group ID.")
+        return value
+
+    def create(self, validated_data):
+        return SharedStudyPlanner.objects.create(
+            group_id=StudyGroup.objects.get(id=validated_data['group_id']),
+            topicDiscription=validated_data['topicDiscription'],
+            dueDate=validated_data['dueDate'],
+            created_by=self.context['request'].user
+        )

@@ -37,6 +37,30 @@ class GroupMessage(models.Model):
 
 
     def __str__(self):
-        return self.id
+        return str(self.id)
 
+
+class SharedStudyPlanner(models.Model):
+    id= models.AutoField(primary_key=True)
+    group_id=models.ForeignKey(StudyGroup,on_delete=models.CASCADE)
+    topicDiscription=models.TextField()
+    dueDate=models.DateField()
+    status = models.CharField(
+    max_length=20,
+    choices=[('Not Started', 'Not Started'),('In Progress', 'In Progress'),('Completed', 'Completed')],default='Not Started')
+
+    created_by=models.ForeignKey(User,on_delete=models.CASCADE)
+
+    def __str__(self):
+        return str(self.id)
+
+class GroupTask(models.Model):
+    id=models.AutoField(primary_key=True)
+    group_id=models.ForeignKey(StudyGroup,on_delete=models.CASCADE)
+    task_name=models.CharField(max_length=100)
+    due_date=models.DateField()
+    assigned_to=models.ForeignKey(User,on_delete=models.CASCADE)
+
+    def __str__(self):
+        return self.task_name
     
