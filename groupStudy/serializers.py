@@ -93,7 +93,7 @@ class addGroupTaskSerializer(serializers.Serializer):
     due_date = serializers.DateField()
     assigned_to = serializers.CharField(max_length=100, required=True)
     complexity = serializers.ChoiceField(
-        choices=[('Low', 'Low'), ('Medium', 'Medium'), ('Hard', 'Hard')],
+        choices=[('Low', 'Low'), ('Medium', 'Medium'), ('High', 'High')],
         required=True
     )
     is_done = serializers.BooleanField(default=False, required=False)

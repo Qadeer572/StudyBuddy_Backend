@@ -60,7 +60,7 @@ class GroupTask(models.Model):
     task_name=models.CharField(max_length=100)
     due_date=models.DateField()
     assigned_to=models.ForeignKey(User,on_delete=models.CASCADE)
-    complexity = models.CharField(max_length=20, choices=[('Low', 'Low'), ('Medium', 'Medium'), ('Hard', 'Hard')], default='Low')
+    complexity = models.CharField(max_length=20, choices=[('Low', 'Low'), ('Medium', 'Medium'), ('High', 'High')], default='Low')
     is_done = models.BooleanField(default=False)
     def __str__(self):
         return self.task_name
