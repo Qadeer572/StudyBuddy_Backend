@@ -105,8 +105,9 @@ class getSharedStudyPlanner(APIView):
         user_groups = GroupMemberShip.objects.filter(user_id=user).values_list('group_id', flat=True)
         
         # Get shared planners in those groups
+        
         shared_planners = SharedStudyPlanner.objects.filter(group_id__in=user_groups)
-
+         
         if not shared_planners.exists():
             return Response({
                 "status": True,
@@ -161,7 +162,7 @@ class getGroupTask(APIView):
                 "complexity": task.complexity,
                 "is_done": task.is_done
             })
-
+        print(data)
         return Response({
             "status": True,
             "data": data,
