@@ -80,7 +80,7 @@ class GroupCreationSerializer(serializers.Serializer):
 
 
         
-class sharedStudyPlannerSerializer(serializers.ModelSerializer):
+class sharedStudyPlannerSerializer(serializers.Serializer):
     class Meta:
         model = SharedStudyPlanner
         fields = ['id', 'group_id', 'topicDiscription','status', 'dueDate', 'created_by']
@@ -91,13 +91,18 @@ class addGroupTaskSerializer(serializers.Serializer):
     group_id = serializers.IntegerField()
     task_name = serializers.CharField(max_length=100)
     due_date = serializers.DateField()
-    assign_to = serializers.CharField(max_length=100, required=False)
+    assigned_to = serializers.CharField(max_length=100, required=True)
+    complexity = serializers.ChoiceField(
+        choices=[('Low', 'Low'), ('Medium', 'Medium'), ('Hard', 'Hard')],
+        required=True
+    )
+    is_done = serializers.BooleanField(default=False, required=False)
 
     def validate_group_id(self, value):
         if not StudyGroup.objects.filter(id=value).exists():
             raise ValidationError("Invalid group ID.")
         return value
-
+    
     def validate_assign_to(self, value):
         try:
             user = User.objects.get(username=value)
@@ -115,14 +120,16 @@ class addGroupTaskSerializer(serializers.Serializer):
         group = StudyGroup.objects.get(id=validated_data['group_id'])
 
         assigned_user = None
-        if 'assign_to' in validated_data:
-            assigned_user = User.objects.get(username=validated_data['assign_to'])
-
+        if 'assigned_to' in validated_data:
+            assigned_user = User.objects.get(username=validated_data['assigned_to'])
+        print("Assigned User:", assigned_user)
         task = GroupTask.objects.create(
             group_id=group,
             task_name=validated_data['task_name'],
             due_date=validated_data['due_date'],
-            assigned_to=assigned_user
+            assigned_to=assigned_user,
+            complexity=validated_data['complexity'],
+            is_done=validated_data['is_done']
         )
         return task
 
@@ -146,3 +153,7 @@ class AddSharedStudyPlannerSerializer(serializers.Serializer):
             dueDate=validated_data['dueDate'],
             created_by=self.context['request'].user
         )
+
+
+class getMemberSerializer(serializers.Serializer):
+    group_id = serializers.IntegerField()

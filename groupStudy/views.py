@@ -2,7 +2,7 @@ from django.shortcuts import render
 from rest_framework.views import APIView
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
-from .serializers import GroupCreationSerializer,AddMemberSerializer,groupSerializer,addGroupTaskSerializer,sharedStudyPlannerSerializer,AddSharedStudyPlannerSerializer
+from .serializers import GroupCreationSerializer,AddMemberSerializer,groupSerializer,addGroupTaskSerializer,sharedStudyPlannerSerializer,AddSharedStudyPlannerSerializer,getMemberSerializer
 from django.contrib.auth.models import User
 from .models import StudyGroup,GroupMemberShip,SharedStudyPlanner,GroupTask
 from datetime import date
@@ -98,6 +98,7 @@ class getSharedStudyPlanner(APIView):
     permission_classes = [IsAuthenticated]
 
     def get(self, request):
+        
         user = request.user
         
         # Get all groups the user is part of
@@ -155,7 +156,10 @@ class getGroupTask(APIView):
                 "id": task.id,
                 "task_name": task.task_name,
                 "due_date": task.due_date,
-                "assigned_to": task.assigned_to.username
+                "assigned_to": task.assigned_to.username,
+                "group_id": task.group_id.id,
+                "complexity": task.complexity,
+                "is_done": task.is_done
             })
 
         return Response({
@@ -171,7 +175,7 @@ class addGroupTask(APIView):
 
     def post(self,request):
         serializer = addGroupTaskSerializer(data=request.data)
-
+        print(request.data)
         if not serializer.is_valid():
             return Response({
                 "status": False,
@@ -193,6 +197,7 @@ class addGroupTask(APIView):
 class addStudyPlanne(APIView):
     permission_classes = [IsAuthenticated]
 
+    print("chawan")
     def post(self, request):
         serializer = AddSharedStudyPlannerSerializer(data=request.data, context={'request': request})
         
@@ -211,3 +216,31 @@ class addStudyPlanne(APIView):
             "data": {},
             "message": "Shared study planner added successfully"
         })
+
+
+class getUser(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request):
+        serializer=getMemberSerializer(data=request.data, context={'request': request})
+        if not serializer.is_valid():
+            return Response({
+                "status": False,
+                "data": {},
+                "message": "Data is not valid"
+            }, status=400)
+        
+         
+        users = GroupMemberShip.objects.filter(group_id=serializer.validated_data['group_id'])
+        data = []
+        for user in users:
+            data.append({
+                "id": user.user_id.id,
+                "username": user.user_id.username,
+            })
+        print(data)    
+        return Response({
+            "status": True,
+            "data": data,
+            "message": "Users retrieved successfully"
+        })    
