@@ -14,6 +14,7 @@ from datetime import date
 
 
 class allSubjects(APIView):
+    permission_classes=[IsAuthenticated]
     def get(self, request):
         subjects = Subject.objects.filter(user_id=request.user)
         serializer = SubjectSerializer(subjects, many=True)

@@ -9,7 +9,12 @@ class FlashCardDeck(models.Model):
     user_id=models.ForeignKey(User, on_delete=models.CASCADE)
     subject=models.ForeignKey(Subject, on_delete=models.CASCADE)
     name=models.CharField(max_length=100)
+    cardCount=models.IntegerField(default=0, validators=[MinValueValidator(0)])
+    dueCards=models.IntegerField(default=0, validators=[MinValueValidator(0)])
+    mastered= models.IntegerField(default=0, validators=[MinValueValidator(0)])
+    learning= models.IntegerField(default=0, validators=[MinValueValidator(0)])
     is_shared=models.BooleanField(default=False)
+    lastStudied=models.DateTimeField(blank=True, null=True)
     created_at=models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
