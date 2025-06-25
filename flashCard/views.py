@@ -48,6 +48,7 @@ class generatCard():
             Each flashcard must include:
             - "question": The question text
             - "options": A list of exactly 4 distinct options (strings)
+            - "correctAnswer": The index (0-3) of the correct answer in the "options" list
             - "answer": The correct answer — MUST be exactly one of the options
             - "explanation": A short explanation for why the answer is correct
 
@@ -60,6 +61,7 @@ class generatCard():
             {{
                 "question": "...",
                 "options": ["...", "...", "...", "..."],
+                "correctAnswer": (index of correct answer),  # This should be one index of correct answer in options
                 "answer": "...",
                 "explanation": "..."
             }},
@@ -149,10 +151,11 @@ class addCardDeck(APIView):
             })
         flashcard_objs = []  # To keep track of flashcards
         all_options = []     # To keep options in the same order
-
+        all_answers = []     # To keep the index of the correct answer
         for card in flashcards:
             question = card.get('question')
             options = card.get('options')
+            correct_answer = card.get('correctAnswer')   
             answer = card.get('answer')
             explanation = card.get('explanation')
 
@@ -179,9 +182,10 @@ class addCardDeck(APIView):
 
             flashcard_objs.append(flashcard)
             all_options.append(options)  # Keep the options in order
+            all_answers.append(correct_answer)
 
         quiz = QuizCreation()
-        quiz.generateQuiz(deck, flashcard_objs, all_options)
+        quiz.generateQuiz(deck, flashcard_objs, all_options,all_answers)
 
 
         return Response({
@@ -205,7 +209,7 @@ class updatStatusCard(APIView):
         deck.dueCards = request.data['dueCards']
         deck.mastered = request.data['mastered']
         deck.learning = request.data['learning']
-        deck.sucess_rate=request.data['sucess_rate']
+        deck.sucess_rate=request.data['success_rate']
         deck.lastStudied = date.today()
         deck.save()
 
@@ -219,7 +223,7 @@ class updatStatusCard(APIView):
 class QuizCreation():
 
     @staticmethod
-    def generateQuiz(deck, flashcard_objs, all_options):
+    def generateQuiz(deck, flashcard_objs, all_options,all_Answer):
         quiz = Quiz.objects.create(
             user_id=deck.user_id,
             deck_id=deck,
@@ -231,11 +235,13 @@ class QuizCreation():
         for i in range(len(flashcard_objs)):
             fc = flashcard_objs[i]
             options = all_options[i]
+            correctAnswer = all_Answer[i] # Assuming the first option is the correct answer
             try:
                 QuizQuestion.objects.create(
                     quiz_id=quiz,
                     flashcard_id=fc,
                     question=fc.question,
+                    correctAnswer=correctAnswer,
                     options=options
                 )
             except Exception as e:
@@ -252,10 +258,57 @@ class getQuizes(APIView):
     def get(self, request):
         user_id = request.user
         quizzes = Quiz.objects.filter(user_id=user_id).values(
-            'id', 'deck_id__name', 'score', 'total_questions', 'created_at'
+            'id', 'deck_id', 'score', 'total_questions'
         )
 
         return Response({
             "status": True,
             "quizzes": list(quizzes)
         })
+
+class getQuizQuestion(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        user_id= request.user
+        quiz=Quiz.objects.filter(user_id=user_id)
+        if not quiz.exists():
+            return Response({
+                "status": True,
+                "error": "No quizzes found"
+            })
+        questions_list = []
+        for q in quiz:
+            questions = QuizQuestion.objects.filter(quiz_id=q).values(
+                'id','quiz_id','flashcard_id','question','options','correctAnswer'
+            )
+            questions_list.append(questions)
+        return Response({
+            "status": True,
+            "questions": questions_list,
+            "message" : "Receive All Quiz Questions"
+        })        
+
+class getAnswer(APIView):
+    permission_classes=[IsAuthenticated]
+
+    def get(self,request):
+        user_id=request.user
+        deck= FlashCardDeck.objects.filter(user_id=user_id)
+        if not deck:
+            return Response({
+                "status": True,
+                "error": "Deck not found"
+            })
+        answers_list = []
+        for d in deck:
+            flashcards = FlashCard.objects.filter(deck_id=d)
+            for fc in flashcards:
+                answers = Answer.objects.filter(card_id=fc).values('id', 'card_id', 'answer', 'explanation')
+                answers_list.extend(answers)
+
+        return Response({
+            "status": True,
+            "answers": list(answers_list),
+            "message" : "Message Receive Successfully"
+        })             

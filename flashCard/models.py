@@ -76,6 +76,7 @@ class QuizQuestion(models.Model):
     question=models.TextField()
     flashcard_id=models.ForeignKey(FlashCard, on_delete=models.CASCADE)
     user_answer=models.TextField(blank=True, null=True)
+    correctAnswer=models.IntegerField(blank=True, null=True)  # To store the index of the correct answer
     is_correct=models.BooleanField(default=False)
     options=models.JSONField(blank=True, null=True)  # To store multiple choice options if needed
 
