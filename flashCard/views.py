@@ -312,3 +312,27 @@ class getAnswer(APIView):
             "answers": list(answers_list),
             "message" : "Message Receive Successfully"
         })             
+
+class updatQuizScore(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def post(self,request):
+        try:
+            quiz = Quiz.objects.get(id=request.data['quiz_id'], user_id=request.user)
+        except Quiz.DoesNotExist:
+            return Response({
+                "status": False,
+                "error": "Quiz not found"
+            })
+        if quiz.score > request.data['score']:
+            return Response({
+                "status": True,
+                "error": "New score must be greater than current score"
+            })
+        quiz.score = request.data['score']
+        quiz.save()
+
+        return Response({
+            "status": True,
+            "message": "Quiz score updated successfully"
+        })        

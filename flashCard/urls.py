@@ -1,7 +1,7 @@
 from django.contrib import admin
 from django.urls import path,include
 from . import views 
-from flashCard.views import addCardDeck,getDecks,getflashCards,updatStatusCard,getQuizes,getQuizQuestion,getAnswer
+from flashCard.views import addCardDeck,getDecks,getflashCards,updatStatusCard,getQuizes,getQuizQuestion,getAnswer,updatQuizScore
 urlpatterns = [
     path('addCardDeck/',views.addCardDeck.as_view(),name="addDeck"),
     path('getDecks/',views.getDecks.as_view(),name="getDecks"),
@@ -10,4 +10,5 @@ urlpatterns = [
     path('getQuizes/',views.getQuizes.as_view(),name="getQuizes"),
     path('getQuizQuestion/',views.getQuizQuestion.as_view(),name="getQuizQuestion"),
     path('getAnswer/',views.getAnswer.as_view(),name="getAnswer"),
+    path('updatQuizScore/',views.updatQuizScore.as_view(),name="updatQuizScore")
 ]
