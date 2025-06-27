@@ -23,4 +23,5 @@ urlpatterns = [
     path('studyplanner/', include('studyPlanner.urls'),),
     path('groupStudy/', include('groupStudy.urls'),),
     path('flashcard/', include('flashCard.urls'),),
+    path('promodroTimer/',include('PromordoTimer.urls'),)
 ]
