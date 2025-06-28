@@ -8,8 +8,6 @@ class AnalyticalSnapshot(models.Model):
     user_id=models.ForeignKey(User,on_delete=models.CASCADE)
     date=models.DateField()
     study_minuts=models.IntegerField(default=0)
-    topic_completed=models.IntegerField(default=0)
-    flashcards_reviewed=models.IntegerField(default=0)
     avg_quiz_score=models.FloatField(default=0.0)
 
     def __str__(self):
