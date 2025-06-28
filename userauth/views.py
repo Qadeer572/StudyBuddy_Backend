@@ -89,3 +89,40 @@ class setDefaultTimer(APIView):
                 "audioNotification": promodro.audioNotification
             }
         })        
+
+class signup(APIView):
+
+    def post(self,request):
+        first_name = request.data.get("firstName")
+        last_name = request.data.get("lastName")
+        email = request.data.get("email")
+        password = request.data.get("password")
+        if not first_name or not last_name or not email or not password:
+            return Response({
+                "status": False,
+                "error": "All fields are required"
+            }, status=400)
+        if User.objects.filter(email=email).exists():
+            return Response({
+                "status": False,
+                "error": "Email already exists"
+            }, status=400)
+        user = User.objects.create_user(
+            username=email,
+            first_name=first_name,
+            last_name=last_name,
+            email=email,
+            password=password
+        )
+        user.save()
+
+        return Response({
+            "status": True,
+            "message": "User registered successfully",
+            "data": {
+                "id": user.id,
+                "username": user.username,
+                "email": user.email,
+                "password": user.password  # Note: Do not return password in production
+            }
+        })
